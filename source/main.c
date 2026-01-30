@@ -29,19 +29,31 @@ void initGrid(){
 }
 void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
     switch(swipeDir){
-        int temp = grid[gridX][gridY];
+        
         case(SwipeLeft):{
+            int temp = grid[gridX][gridY];
             grid[gridX][gridY] = grid[gridX -1 ][gridY];
             grid[gridX - 1][gridY] = temp;
 
             break;
         }
         case(SwipeRight):{
+            int temp = grid[gridX][gridY];
             grid[gridX][gridY] = grid[gridX + 1 ][gridY];
             grid[gridX + 1][gridY] = temp;
+            break;
         }
         case(SwipeUp):{
-            
+            int temp = grid[gridX][gridY];
+            grid[gridX][gridY] = grid[gridX][gridY - 1];
+            grid[gridX][gridY - 1] = temp;
+            break;
+        }
+        case(SwipeDown):{
+            int temp = grid[gridX][gridY];
+            grid[gridX][gridY] = grid[gridX][gridY + 1];
+            grid[gridX][gridY + 1] = temp;
+            break;
         }
     }
     drawGrid();
@@ -116,8 +128,8 @@ while(1){
     NF_WriteText(0, 1, 20, 8, buffery);
     
     if(getSwipeGesture(SwipeLeft))  { strcpy(mytext, "LEFT  "); swipeBlocks(gridx + 1, gridy, SwipeLeft);}
-    if(getSwipeGesture(SwipeUp))    { strcpy(mytext, "UP    ");  }
-    if(getSwipeGesture(SwipeDown))  { strcpy(mytext, "DOWN  "); }
+    if(getSwipeGesture(SwipeUp))    { strcpy(mytext, "UP"); swipeBlocks( gridx, gridy + 1, SwipeUp); }
+    if(getSwipeGesture(SwipeDown))  { strcpy(mytext, "DOWN  "); swipeBlocks( gridx, gridy - 1, SwipeDown); }
     if(getSwipeGesture(SwipeRight)) { strcpy(mytext, "RIGHT "); swipeBlocks(gridx - 1, gridy, SwipeRight);}
 
      NF_Draw3dSprites();
