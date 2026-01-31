@@ -23,14 +23,45 @@ void drawGrid(){
 void initGrid(){
     for(int i = 0; i < 8; i ++){
         for(int j = 0; j < 8; j++){
-            grid[i][j] = rand() % 5;
+            grid[i][j] = rand() % 6;
+        }
+    }
+}
+void clearLines(){
+    int counter = 1;
+    int lastTile = -1;
+    bool matching = false;
+    int toclearRows[32][2];
+    memset(toclearRows,-1,sizeof(toclearRows));
+    int toClearRowsLength[32];
+    memset(toClearRowsLength,-1,sizeof(toClearRowsLength));
+    for(int i = 0; i < 8; i ++){
+        for(int j = 0; j < 8; j++){
+            if(j == 0){
+                lastTile = grid[i][0];
+                continue;
+            }
+            if(grid[i][j] == lastTile){
+                counter++;
+                matching = true;
+            }else{
+                matching = false
+            }
+            if(counter >= 3 && matching == false){
+                
+            }else{
+                coutnter = 0;
+            }
+        
         }
     }
 }
 void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
+    if(gridX > 7 || gridX < 0 || gridY > 7 || gridX < 0) return;
+    
     switch(swipeDir){
-        
         case(SwipeLeft):{
+            if(gridX - 1 < 0) return;
             int temp = grid[gridX][gridY];
             grid[gridX][gridY] = grid[gridX -1 ][gridY];
             grid[gridX - 1][gridY] = temp;
@@ -38,18 +69,21 @@ void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             break;
         }
         case(SwipeRight):{
+            if(gridX + 1 > 7) return;
             int temp = grid[gridX][gridY];
             grid[gridX][gridY] = grid[gridX + 1 ][gridY];
             grid[gridX + 1][gridY] = temp;
             break;
         }
         case(SwipeUp):{
+            if(gridY - 1 < 0 ) return;
             int temp = grid[gridX][gridY];
             grid[gridX][gridY] = grid[gridX][gridY - 1];
             grid[gridX][gridY - 1] = temp;
             break;
         }
         case(SwipeDown):{
+            if(gridY + 1 < 7) return;
             int temp = grid[gridX][gridY];
             grid[gridX][gridY] = grid[gridX][gridY + 1];
             grid[gridX][gridY + 1] = temp;
@@ -77,7 +111,7 @@ int main(){
     NF_InitTextSys(0);
      NF_LoadTextFont("fnt/default", "normal", 256, 256, 0); 
      NF_CreateTextLayer(0, 1, 0, "normal");
-    NF_InitSpriteBuffers();   
+    NF_InitSpriteBuffers();    
     NF_Init3dSpriteSys();
     for(int i  = 0; i < 64; i ++){
         NF_LoadSpriteGfx("sprite/numbers", i, 16, 16);

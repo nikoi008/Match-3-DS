@@ -1,7 +1,8 @@
 #!/bin/bash
 
-BLOCKSDS="${BLOCKSDS:-/opt/blocksds/core/}"
-GRIT=$BLOCKSDS/tools/grit/grit
+BLOCKSDS="${BLOCKSDS:-/opt/wonderful/thirdparty/blocksds/core}"
+GRIT="$BLOCKSDS/tools/grit/grit"
+
 
 $GRIT numbers.png -ftB -fh! -gTFF00FF -gb -gB8 -m!
 

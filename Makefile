@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: CC0-1.0
 # SPDX-FileContributor: Antonio Niño Díaz, 2023-2024
 
-# Use absolute MSYS2 paths to ensure the shell finds the tools
+
 export WONDERFUL_TOOLCHAIN    := /c/msys64/opt/wonderful
 export BLOCKSDS               := $(WONDERFUL_TOOLCHAIN)/thirdparty/blocksds/core
 export BLOCKSDSEXT            := $(WONDERFUL_TOOLCHAIN)/thirdparty/blocksds/external
 
-# This is where the compiler sits
+
 ARM_NONE_EABI_PATH            := $(WONDERFUL_TOOLCHAIN)/toolchain/gcc-arm-none-eabi/bin/
 
 # User config
