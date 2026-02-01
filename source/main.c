@@ -184,13 +184,14 @@ int main(){
 
     //2d sprites
     for(int i = 64; i < 128; i++ ){
-        NF_LoadSpriteGfx("sprite/character", i, 32, 32);
+        NF_LoadSpriteGfx("sprite/character", i, 32, 32);//todo change back to 16x16 and use NF_SpriteRotScale  examples/graphics/spriteaffine/
     }
     NF_LoadSpritePal("sprite/character", 1);
+    NF_VramSpritePal(1, 1, 1);
     for(int i = 64; i < 128; i++){
-        NF_VramSpriteGfx(0, i, i, true); 
+        NF_VramSpriteGfx(1, i, i, true); 
     }
-    NF_VramSpritePal(0, 1, 1);
+
 
 
 
@@ -214,6 +215,14 @@ int main(){
 
     
      NF_Sort3dSprites();
+    for(int i = 0; i < 8; i++){
+        for(int j = 0; j < 8; j++){
+            int x = 38 + ( 20 * i);
+            int y = 16 + ( 20 * j);
+            NF_CreateSprite(1,((i * 8) + j) + 64,((i * 8) + j) + 64,1,x,y);
+            NF_SpriteFrame(1, ((i * 8) + j) + 64, gridTop[i][j]);
+        }
+    }
     int gridx = 0;
     int gridy = 0;
 while(1){
