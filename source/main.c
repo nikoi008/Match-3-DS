@@ -3,10 +3,14 @@
 
 #include <nds.h>
 #include <filesystem.h>
+#include <maxmod9.h>
 #include "simplenfl.h"
 #include <stdbool.h>
 #include <nf_lib.h>
+#include <maxmod9.h>
+#include "soundbank.h"
 int grid[8][8] = {0};
+int gridTop[8][8] = {0};
 typedef enum{
     UP,
     LEFT,
@@ -24,7 +28,15 @@ void drawGrid(){
     }
 
 }
-void initGrid(){
+
+void initGridTop(){
+    for(int i = 0; i < 8; i ++){
+        for(int j = 0; j < 8; j++){
+            gridTop[i][j] = rand() % 6;
+        }
+    }
+}
+void initGridBottom(){
     for(int i = 0; i < 8; i ++){
         for(int j = 0; j < 8; j++){
             grid[i][j] = rand() % 6;
@@ -51,7 +63,7 @@ bool findMatches(){
     for(int x = 0; x < 8; x++){
         for(int y = 0; y < 8 - 2; y++){
         int currentTile = grid[y][x];
-        if(currentTile == grid[y + 1][x] && currentTile == grid[y + 2][x]){
+        if(currentTile == grid[y + 1][x] && currentTile == grid[y + 2][x] && currentTile != -1){
             matchGrid[y][x] = true;
             matchGrid[y + 1][x] = true;
             matchGrid[y + 2][x] = true;
@@ -62,7 +74,7 @@ bool findMatches(){
     for(int y = 0; y < 8; y++){
         for(int x = 0; x < 8 - 2; x++){
         int currentTile = grid[y][x];
-        if(currentTile == grid[y][x + 1] && currentTile == grid[y][x + 2]){
+        if(currentTile == grid[y][x + 1] && currentTile == grid[y][x + 2] && currentTile != -1){
             matchGrid[y][x] = true;
             matchGrid[y][x + 1] = true;
             matchGrid[y][x + 2] = true;
@@ -81,12 +93,20 @@ void applyMatches(){
         }
     }
 }
+void dropPieces(){
+    for(int i = 0; i < 8; i++){
+        for(int j =0; j < 8; j++){
+
+        }
+    }
+}
 void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
     if(gridX > 7 || gridX < 0 || gridY > 7 || gridX < 0) return;
     
     switch(swipeDir){
         case(SwipeLeft):{
             if(gridX - 1 < 0) return;
+            
             int temp = grid[gridX][gridY];
             grid[gridX][gridY] = grid[gridX -1 ][gridY];
             grid[gridX - 1][gridY] = temp;
@@ -117,7 +137,7 @@ void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
     }
     drawGrid();
 }
-
+ 
 int main(){
     uint16_t keys_held;
     touchPosition touch_pos;
@@ -134,36 +154,65 @@ int main(){
     NF_InitTiledBgSys(0);       
     NF_InitTiledBgSys(1);       
     NF_InitTextSys(0);
-     NF_LoadTextFont("fnt/default", "normal", 256, 256, 0); 
-     NF_CreateTextLayer(0, 1, 0, "normal");
+    NF_InitSpriteBuffers();
+    NF_InitSpriteSys(0);
+    NF_InitSpriteSys(1);
+    NF_LoadTextFont("fnt/default", "normal", 256, 256, 0); 
+    NF_CreateTextLayer(0, 1, 0, "normal");
     NF_InitSpriteBuffers();    
     NF_Init3dSpriteSys();
+    mmInitDefault("nitro:/soundbank.bin");
+    mmLoadEffect(SFX_FIRE_EXPLOSION);
+    soundEnable();
+    initGridTop();
+    int semitones = 0;
+    //3d sprites
+    const uint16_t combo_pitches[] = {1024, 1085, 1149, 1218, 1290, 1366, 1448, 1534, 1625, 1722, 1825, 1933, 2048};
     for(int i  = 0; i < 64; i ++){
         NF_LoadSpriteGfx("sprite/numbers", i, 16, 16);
+        
     }
         
     NF_LoadSpritePal("sprite/numbers", 0);
     for(int i = 0; i < 64; i++){
         NF_Vram3dSpriteGfx(i, i, true);
+        
+
     }
     NF_Vram3dSpritePal(0, 0);
     NF_Sort3dSprites();
+
+    //2d sprites
+    for(int i = 64; i < 128; i++ ){
+        NF_LoadSpriteGfx("sprite/character", i, 32, 32);
+    }
+    NF_LoadSpritePal("sprite/character", 1);
+    for(int i = 64; i < 128; i++){
+        NF_VramSpriteGfx(0, i, i, true); 
+    }
+    NF_VramSpritePal(0, 1, 1);
+
+
+
     lcdSwap();
-    int frame = 0;
+
     char mytext[32] = "";
     char bufferx[2] = "";
     char buffery[2] = "";
-    initGrid();
+    //drawing
+    initGridBottom();
+    initGridTop();
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
-            int x = 16 * i;
-            int y = 16 * j;
+            int x = 38 + ( 20 * i);
+            int y = 16 + ( 20 * j);
             NF_Create3dSprite((i * 8) + j,(i * 8) + j,0,x,y);
             NF_Set3dSpriteFrame((i * 8) + j, grid[i][j]);
+            NF_Scale3dSprite((i * 8) + j, 80, 80);
         }
     }
 
-
+    
      NF_Sort3dSprites();
     int gridx = 0;
     int gridy = 0;
@@ -174,8 +223,8 @@ while(1){
 
     if (keys_held & KEY_TOUCH)
             touchRead(&touch_pos);
-            gridx =  (int)(touch_pos.px/ 16);
-            gridy = touch_pos.py / 16;
+            gridx =  (int)((touch_pos.px - 38)/ 20);
+            gridy = (int)((touch_pos.py - 16)/ 20);
     NF_WriteText(0, 1, 20, 5, mytext);
    
     
@@ -191,7 +240,12 @@ while(1){
     if(getSwipeGesture(SwipeUp))    { strcpy(mytext, "UP"); swipeBlocks( gridx, gridy + 1, SwipeUp); }
     if(getSwipeGesture(SwipeDown))  { strcpy(mytext, "DOWN  "); swipeBlocks( gridx, gridy - 1, SwipeDown); }
     if(getSwipeGesture(SwipeRight)) { strcpy(mytext, "RIGHT "); swipeBlocks(gridx - 1, gridy, SwipeRight);}
-    findMatches();
+    if(findMatches()){
+        mm_sfxhand h = mmEffect(SFX_FIRE_EXPLOSION);
+        mmEffectRate(h, combo_pitches[semitones]);
+
+        semitones = (semitones + 1) % 13;
+    }
     applyMatches();
     drawGrid();
      NF_Draw3dSprites();
@@ -199,8 +253,10 @@ while(1){
    
 
     glFlush(0);
-
+    NF_SpriteOamSet(1);
     swiWaitForVBlank();
+    oamUpdate(&oamMain);
+    oamUpdate(&oamSub);
      NF_UpdateTextLayers();
 
     NF_Update3dSpritesGfx();

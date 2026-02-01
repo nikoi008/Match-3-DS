@@ -21,6 +21,7 @@ GAME_ICON     := $(BLOCKSDS)/sys/icon.bmp
 
 SOURCEDIRS	?= source
 NITROFSDIR	?= nitrofiles
+AUDIODIRS	:= audio
 
 # DLDI and internal SD slot of DSi
 # --------------------------------
@@ -33,10 +34,11 @@ SDIMAGE		:= image.bin
 # Libraries
 # ---------
 
-LIBS		+= -lnflib -ldswifi9 -lnds9 -lc
+LIBS        += -lnflib -lmm9 -ldswifi9 -lnds9 -lc
 LIBDIRS		+= $(BLOCKSDSEXT)/nflib \
 		   $(BLOCKSDS)/libs/dswifi \
-		   $(BLOCKSDS)/libs/libnds
+		   $(BLOCKSDS)/libs/libnds \
+		+= $(BLOCKSDS)/libs/maxmod
 
 # Build artifacts
 # ---------------

@@ -9,7 +9,7 @@
 #include <maxmod9.h>
 #include <nds.h>
 
-#include "soundbank.h"
+#include <maxmod9.h>
 
 // - lasse_haen_pyykit.xm
 //

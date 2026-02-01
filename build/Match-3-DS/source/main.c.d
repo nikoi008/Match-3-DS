@@ -63,6 +63,8 @@ build/Match-3-DS/source/main.c.o: source/main.c \
  C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/nds/arm9/teak/fifo.h \
  C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/nds/arm9/teak/tlf.h \
  C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/filesystem.h \
+ C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/maxmod/include/maxmod9.h \
+ C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/maxmod/include/mm_types.h \
  source/simplenfl.h \
  C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_lib.h \
  C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_2d.h \
@@ -80,7 +82,8 @@ build/Match-3-DS/source/main.c.o: source/main.c \
  C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_sprite3d.h \
  C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_text16.h \
  C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_text.h \
- C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_tiledbg.h
+ C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_tiledbg.h \
+ build/Match-3-DS/maxmod/soundbank.h
 C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/nds.h:
 C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/nds/bios.h:
 C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/nds/ndstypes.h:
@@ -145,6 +148,8 @@ C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/nds/arm9/te
 C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/nds/arm9/teak/fifo.h:
 C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/nds/arm9/teak/tlf.h:
 C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/libnds/include/filesystem.h:
+C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/maxmod/include/maxmod9.h:
+C:/msys64/opt/wonderful/thirdparty/blocksds/core/libs/maxmod/include/mm_types.h:
 source/simplenfl.h:
 C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_lib.h:
 C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_2d.h:
@@ -163,3 +168,4 @@ C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_sprite3d.h
 C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_text16.h:
 C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_text.h:
 C:/msys64/opt/wonderful/thirdparty/blocksds/external/nflib/include/nf_tiledbg.h:
+build/Match-3-DS/maxmod/soundbank.h:
