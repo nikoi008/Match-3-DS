@@ -4,6 +4,7 @@
 #include <nds.h>
 #include <filesystem.h>
 #include "simplenfl.h"
+#include <stdbool.h>
 #include <nf_lib.h>
 int grid[8][8] = {0};
 typedef enum{
@@ -15,7 +16,10 @@ typedef enum{
 void drawGrid(){
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
-            NF_Set3dSpriteFrame((i * 8) + j, grid[i][j]);
+            if(grid[i][j] == -1){
+                NF_Set3dSpriteFrame((i* 8)+ j,0);
+            }
+            NF_Set3dSpriteFrame((i * 8) + j, grid[i][j] + 1);
         }
     }
 
@@ -27,32 +31,53 @@ void initGrid(){
         }
     }
 }
-void clearLines(){
-    int counter = 1;
-    int lastTile = -1;
-    bool matching = false;
-    int toclearRows[32][2];
-    memset(toclearRows,-1,sizeof(toclearRows));
-    int toClearRowsLength[32];
-    memset(toClearRowsLength,-1,sizeof(toClearRowsLength));
-    for(int i = 0; i < 8; i ++){
+typedef enum{
+    ROW,COLUMN
+}lineClearType;
+typedef struct{
+    lineClearType type;
+    int x;
+    int y;
+    int length;
+}lineClear;
+int matchGrid[8][8];
+bool findMatches(){
+    bool found = false;
+    for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
-            if(j == 0){
-                lastTile = grid[i][0];
-                continue;
+            matchGrid[i][j] = false;
+        }
+    }
+    for(int x = 0; x < 8; x++){
+        for(int y = 0; y < 8 - 2; y++){
+        int currentTile = grid[y][x];
+        if(currentTile == grid[y + 1][x] && currentTile == grid[y + 2][x]){
+            matchGrid[y][x] = true;
+            matchGrid[y + 1][x] = true;
+            matchGrid[y + 2][x] = true;
+            found = true;
+        }
+        }
+    }
+    for(int y = 0; y < 8; y++){
+        for(int x = 0; x < 8 - 2; x++){
+        int currentTile = grid[y][x];
+        if(currentTile == grid[y][x + 1] && currentTile == grid[y][x + 2]){
+            matchGrid[y][x] = true;
+            matchGrid[y][x + 1] = true;
+            matchGrid[y][x + 2] = true;
+            found = true;
             }
-            if(grid[i][j] == lastTile){
-                counter++;
-                matching = true;
-            }else{
-                matching = false
+        }
+    }
+    return found;
+}
+void applyMatches(){
+    for(int i = 0; i < 8; i++){
+        for(int j = 0; j < 8; j++){
+            if(matchGrid[i][j] == true){
+                grid[i][j] = -1;
             }
-            if(counter >= 3 && matching == false){
-                
-            }else{
-                coutnter = 0;
-            }
-        
         }
     }
 }
@@ -83,7 +108,7 @@ void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             break;
         }
         case(SwipeDown):{
-            if(gridY + 1 < 7) return;
+            if(gridY + 1 > 7) return;
             int temp = grid[gridX][gridY];
             grid[gridX][gridY] = grid[gridX][gridY + 1];
             grid[gridX][gridY + 1] = temp;
@@ -143,6 +168,7 @@ int main(){
     int gridx = 0;
     int gridy = 0;
 while(1){
+    
     scanKeys();
     keys_held = keysHeld();
 
@@ -161,11 +187,13 @@ while(1){
     NF_WriteText(0, 1, 20, 7, bufferx);
     NF_WriteText(0, 1, 20, 8, buffery);
     
-    if(getSwipeGesture(SwipeLeft))  { strcpy(mytext, "LEFT  "); swipeBlocks(gridx + 1, gridy, SwipeLeft);}
+    if(getSwipeGesture(SwipeLeft))  { strcpy(mytext, "LEFT  "); swipeBlocks(gridx + 1, gridy, SwipeLeft); }
     if(getSwipeGesture(SwipeUp))    { strcpy(mytext, "UP"); swipeBlocks( gridx, gridy + 1, SwipeUp); }
     if(getSwipeGesture(SwipeDown))  { strcpy(mytext, "DOWN  "); swipeBlocks( gridx, gridy - 1, SwipeDown); }
     if(getSwipeGesture(SwipeRight)) { strcpy(mytext, "RIGHT "); swipeBlocks(gridx - 1, gridy, SwipeRight);}
-
+    findMatches();
+    applyMatches();
+    drawGrid();
      NF_Draw3dSprites();
 
    
