@@ -23,7 +23,7 @@ void drawGrid(){
             if(grid[i][j] == -1){
                 NF_Set3dSpriteFrame((i* 8)+ j,0);
             }
-            NF_Set3dSpriteFrame((i * 8) + j, grid[i][j] + 1);
+            NF_Set3dSpriteFrame((i * 8) + j, grid[i][j] + 1); 
         }
     }
 
@@ -93,12 +93,34 @@ void applyMatches(){
         }
     }
 }
-void dropPieces(){
-    for(int i = 0; i < 8; i++){
-        for(int j =0; j < 8; j++){
-
+void drawBottomGrid
+void bringBlocksDown(){
+    for(int row = 0; row < 8 ;row++){
+        for(int col = 6; col >= 0; col--){
+            if(grid[row][col] != -1 && grid[row][col + 1] == -1){
+                grid[row][col + 1] =grid[row][col];
+                grid[row][col] = -1;
+            }
         }
     }
+    for(int row = 0; row < 8; row++){
+        int topYDepth = 7;
+        for(int col = 7; col >= 0; col--){
+            if(grid[row][col] == -1){
+                grid[row][col] = gridTop[topYDepth][col];
+                gridTop[topYDepth][col] = -1;
+                topYDepth--;
+            }
+        }
+    }  
+    /*current structure for line filling
+    1) Bottom grid check from bottom to top for -1, brings tile down if the one below it is -1
+    2) Moves the ones from the nottom of topgrid down to fill in the -1s that are piled up
+    3) Same as step one but for topgrid
+    4)Fills the top layer of -1s with random block
+    
+    Topswipe is buggy, being pushed down because of checks??
+    //todo add a draw topgrid*/
 }
 void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
     if(gridX > 7 || gridX < 0 || gridY > 7 || gridX < 0) return;
@@ -137,7 +159,7 @@ void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
     }
     drawGrid();
 }
- 
+
 int main(){
     uint16_t keys_held;
     touchPosition touch_pos;
@@ -256,6 +278,7 @@ while(1){
         semitones = (semitones + 1) % 13;
     }
     applyMatches();
+    bringBlocksDown();
     drawGrid();
      NF_Draw3dSprites();
 
