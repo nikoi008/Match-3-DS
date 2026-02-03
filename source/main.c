@@ -22,65 +22,7 @@ void initGrid(){
         }
     }
 }
-
-void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
-    
-    if(gridX > 7 || gridX < 0 || gridY > 15 || gridY < 7) return;
-    
-    switch(swipeDir){
-        case(SwipeLeft):{ 
-            if(gridX - 1 < 0) return; 
-            
-            int temp = grid[gridY][gridX];
-            
-            grid[gridY][gridX] = grid[gridY][gridX - 1]; 
-            grid[gridY][gridX - 1] = temp;
-            break;
-        }
-        case(SwipeRight):{
-            if(gridX + 1 > 7) return; 
-            int temp = grid[gridY][gridX];
-            grid[gridY][gridX] = grid[gridY][gridX + 1];
-            grid[gridY][gridX + 1] = temp;
-            break;
-        }
-        case(SwipeUp):{
-            if(gridY - 1 < 0 ) return; 
-            
-            int temp = grid[gridY][gridX];
-            grid[gridY][gridX] = grid[gridY - 1][gridX];
-            grid[gridY - 1][gridX] = temp;
-            break;
-        }
-        case(SwipeDown):{
-            if(gridY + 1 > 15) return; 
-            
-            int temp = grid[gridY][gridX]; 
-            grid[gridY][gridX] = grid[gridY + 1][gridX];
-            grid[gridY + 1][gridX] = temp;
-            break;
-        }
-    }
-}
-
-
-
-void drawGridTop(){
-    for(int i = 0; i < 8; i++){     
-        for(int j = 0; j < 8; j++){ 
-            
-            int tileValue = grid[j][i]; 
-
-            if(tileValue == -1){
-                NF_SpriteFrame(1,((i * 8) + j) + 64, 0);
-            }else{
-                NF_SpriteFrame(1, ((i * 8) + j) + 64, tileValue + 1);
-            }
-        }
-    }
-}
 bool matchGrid[8][8];
-
 bool findMatches(){
     bool found = false;
     for(int i = 0; i < 8; i++){
@@ -114,6 +56,83 @@ bool findMatches(){
     }
     return found;
 }
+void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
+    
+    if(gridX > 7 || gridX < 0 || gridY > 15 || gridY < 7) return;
+    
+    switch(swipeDir){
+        case(SwipeLeft):{ 
+            if(gridX - 1 < 0) return; 
+            int temp = grid[gridY][gridX];
+            grid[gridY][gridX] = grid[gridY][gridX - 1]; 
+            grid[gridY][gridX - 1] = temp;
+            if(findMatches()){ 
+                break;
+            }else{
+                grid[gridY][gridX - 1] = grid[gridY][gridX];
+                grid[gridY][gridX] = temp;
+            }
+            break;
+        }
+        case(SwipeRight):{
+            if(gridX + 1 > 7) return; 
+            int temp = grid[gridY][gridX];
+            grid[gridY][gridX] = grid[gridY][gridX + 1];
+            grid[gridY][gridX + 1] = temp;
+            if(findMatches()){ 
+                break;
+            }else{ 
+                grid[gridY][gridX + 1] = grid[gridY][gridX];
+                grid[gridY][gridX] = temp;
+            }
+            break;
+        }
+        case(SwipeUp):{
+            if(gridY - 1 < 0 ) return; 
+            int temp = grid[gridY][gridX];
+            grid[gridY][gridX] = grid[gridY - 1][gridX];
+            grid[gridY - 1][gridX] = temp;
+            if(findMatches()){ 
+                break;
+            }else{
+                grid[gridY - 1][gridX] = grid[gridY][gridX];
+                grid[gridY][gridX] = temp;
+            }
+            break;
+        }
+        case(SwipeDown):{
+            if(gridY + 1 > 15) return; 
+            int temp = grid[gridY][gridX]; 
+            grid[gridY][gridX] = grid[gridY + 1][gridX];
+            grid[gridY + 1][gridX] = temp;
+            if(findMatches()){ 
+                break;
+            }else{
+                grid[gridY + 1][gridX] = grid[gridY][gridX];
+                grid[gridY][gridX] = temp;
+            }
+            break;
+        }
+    }
+}
+
+void drawGridTop(){
+    for(int i = 0; i < 8; i++){     
+        for(int j = 0; j < 8; j++){ 
+            
+            int tileValue = grid[j][i]; 
+
+            if(tileValue == -1){
+                NF_SpriteFrame(1,((i * 8) + j) + 64, 0);
+            }else{
+                NF_SpriteFrame(1, ((i * 8) + j) + 64, tileValue + 1);
+            }
+        }
+    }
+}
+
+
+
 
 
 
