@@ -12,8 +12,7 @@
 #define GRID_ROWS 16
 #define GRID_COLS 8
 int grid[GRID_ROWS][GRID_COLS] = {0};
-
-
+int spriteIdGrid[GRID_ROWS][GRID_COLS];
 
 void initGrid(){
     for(int i = 0; i < GRID_ROWS;i++){
@@ -75,8 +74,8 @@ void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             break;
         }
         case(SwipeRight):{
-            if(gridX + 1 > 7) return; 
-            int temp = grid[gridY][gridX];
+            if(gridX + 1 > 7) return;  
+            int temp = grid[gridY][gridX];  
             grid[gridY][gridX] = grid[gridY][gridX + 1];
             grid[gridY][gridX + 1] = temp;
             if(findMatches()){ 
@@ -96,7 +95,7 @@ void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
                 break;
             }else{
                 grid[gridY - 1][gridX] = grid[gridY][gridX];
-                grid[gridY][gridX] = temp;
+                grid[gridY][gridX] = temp;  
             }
             break;
         }
@@ -119,13 +118,13 @@ void swipeBlocks(int gridX, int gridY, Swipe swipeDir){
 void drawGridTop(){
     for(int i = 0; i < 8; i++){     
         for(int j = 0; j < 8; j++){ 
-            
+            int spriteId = spriteIdGrid[j][i];
             int tileValue = grid[j][i]; 
 
             if(tileValue == -1){
-                NF_SpriteFrame(1,((i * 8) + j) + 64, 0);
+                NF_SpriteFrame(1,spriteId, 0);
             }else{
-                NF_SpriteFrame(1, ((i * 8) + j) + 64, tileValue + 1);
+                NF_SpriteFrame(1, spriteId, tileValue + 1);
             }
         }
     }
@@ -172,11 +171,11 @@ void drawGridBottom(){
             
 
             int tileValue = grid[j + 8][i];
-
+            int spriteId = spriteIdGrid[j + 8][i];
             if(tileValue == -1){
-                NF_Set3dSpriteFrame((i* 8)+ j, 0);   
+                NF_Set3dSpriteFrame(spriteId, 0);   
             }else{
-                NF_Set3dSpriteFrame((i * 8) + j, tileValue + 1); 
+                NF_Set3dSpriteFrame(spriteId, tileValue + 1); 
             }
         }
     }
@@ -211,38 +210,29 @@ int main(){
     initGrid(); 
     int semitones = 0;
     const uint16_t combo_pitches[] = {1024, 1085, 1149, 1218, 1290, 1366, 1448, 1534, 1625, 1722, 1825, 1933, 2048};
-    for(int i  = 0; i < 64; i ++){
-        NF_LoadSpriteGfx("sprite/numbers", i, 16, 16);
-        
-    }
-        
+    NF_LoadSpriteGfx("sprite/numbers", 0, 16, 16);
     NF_LoadSpritePal("sprite/numbers", 0);
-    for(int i = 0; i < 64; i++){
-        NF_Vram3dSpriteGfx(i, i, true);
-    }
+    NF_Vram3dSpriteGfx(0, 0, false);
     NF_Vram3dSpritePal(0, 0);
     NF_Sort3dSprites();
-
-    for(int i = 64; i < 128; i++ ){
-        NF_LoadSpriteGfx("sprite/character", i, 32, 32);
-    }
+    NF_LoadSpriteGfx("sprite/character", 1, 32, 32);
     NF_LoadSpritePal("sprite/character", 1); 
     NF_VramSpritePal(1, 1, 1);
-    for(int i = 64; i < 128; i++){ 
-        NF_VramSpriteGfx(1, i, i, true); 
-    }
+    NF_VramSpriteGfx(1, 1, 1, false); 
+
     
     lcdSwap();
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
-            int x = 38 + ( 20 * i); 
+            int x = 38 + ( 20 * i);   
             int y = 16 + ( 20 * j);
-            NF_Create3dSprite((i * 8) + j,(i * 8) + j,0,x,y);
-            NF_Set3dSpriteFrame((i * 8) + j, grid[i + 8][j]);
-            NF_Scale3dSprite((i * 8) + j, 80, 80);
+            NF_Create3dSprite((i * 8) + j + 64,0,0,x,y); 
+            spriteIdGrid[i + 8][j] = (i * 8) + j + 64;
+            NF_Set3dSpriteFrame((i * 8) + j + 64, grid[i + 8][j]);
+            NF_Scale3dSprite((i * 8) + j + 64, 80, 80);
         }
-    }
-    
+    } 
+       
     NF_Sort3dSprites();
 
 
@@ -250,9 +240,10 @@ int main(){
         for(int j = 0; j < 8; j++){
             int x = 38 + ( 20 * i);
             int y = 16 + ( 20 * j);
-            NF_CreateSprite(1,((i * 8) + j) + 64,((i * 8) + j) + 64,1,x,y);
-            NF_SpriteFrame(1, ((i * 8) + j) + 64, grid[j][i]);
-        }
+            spriteIdGrid[i][j] = (i * 8) + j;
+            NF_CreateSprite(1,((i * 8) + j),1,1,x,y);
+            NF_SpriteFrame(1, ((i * 8) + j), grid[j][i]);
+        }  
     }
     int gridx = 0;
     int gridy = 0;
