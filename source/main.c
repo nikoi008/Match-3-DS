@@ -34,7 +34,7 @@ typedef enum
 int grid[GRID_ROWS][GRID_COLS] = {0};
 int spriteIdGrid[GRID_ROWS][GRID_COLS];
 
-
+bool flushed = false;
 
 void initGrid(){
     for(int i = 0; i < GRID_ROWS;i++)
@@ -103,22 +103,22 @@ void animateSpriteSwipe(Swipe SwipeDir, int gridX, int gridY) {
     int sprite1 = spriteIdGrid[gridY][gridX];
     int sprite2 = spriteIdGrid[targetY][targetX];
 
-    int x1Start = 34 + (gridX * 24);
-    int y1Start = ((gridY - 8) * 24) + 2;
+    int neighbourStartX = 34 + (gridX * 24);
+    int neighbourStartY = ((gridY - 8) * 24) + 2;
 
-    int x2Start = 34 + (targetX * 24);
-    int y2Start = ((targetY - 8) * 24) + 2;
+    int targetXStart = 34 + (targetX * 24);
+    int targetYStart = ((targetY - 8) * 24) + 2;
 
     int frames = 15;
     for (int i = 1; i <= frames; i++)
     {
-        int currentX1 = x1Start + ((x2Start - x1Start) * i / frames);
-        int currentY1 = y1Start + ((y2Start - y1Start) * i / frames);
-        int currentX2 = x2Start + ((x1Start - x2Start) * i / frames);
-        int currentY2 = y2Start + ((y1Start - y2Start) * i / frames);
+        int currentXNeighbour = neighbourStartX + ((targetXStart - neighbourStartX) * i / frames);
+        int currentYNeighbour = neighbourStartY + ((targetYStart - neighbourStartY) * i / frames);
+        int currentXTarget = targetXStart + ((neighbourStartX - targetXStart) * i / frames);
+        int currentYTarget = targetYStart + ((neighbourStartY - targetYStart) * i / frames);
 
-        NF_Move3dSprite(sprite1, currentX1, currentY1);
-        NF_Move3dSprite(sprite2, currentX2, currentY2);
+        NF_Move3dSprite(sprite1, currentXNeighbour, currentYNeighbour);
+        NF_Move3dSprite(sprite2, currentXTarget, currentYTarget);
         NF_Draw3dSprites();       
         glFlush(0);               
         swiWaitForVBlank();       
@@ -208,6 +208,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             break;
         }
     }
+    flushed = true;
     return true;
 }
 void drawGridBottom()
@@ -234,8 +235,6 @@ void drawGridBottom()
     }
 }
 
-  
-
 
 void applyMatches()
 {
@@ -251,17 +250,117 @@ void applyMatches()
         }
     }
 }
-void applyGravity()
-{
-    for(int row = 15; row >= 0; row--)
-    {
-        for(int col = 7; col >= 0; col--)
-        {
-            if(grid[row][col] != -1 && grid[row + 1][col ] == -1)
-            {
+typedef struct{
+    int emptyX;
+    int emptyY;
+}falling;
+void applyGravity() {
+    bool movedSomething = true;
+    int frames = 4;
+    while (movedSomething) {
+        movedSomething = false;
+    
+        for (int row = 15; row > 0; row--) {
+            for (int col = 0; col < GRID_COLS; col++) {
                 
-                    grid[row + 1][col ] =grid[row][col];
-                    grid[row][col] = -1;
+                
+                if (grid[row][col] == -1 && grid[row - 1][col] != -1) {
+                    
+                    if (row > 8) {
+                        
+
+                        for (int i = 1; i <= frames; i++) {
+                            int yOffset = (24 * i / frames);
+                            int startY = ((row - 1 - 8) * 24) + 2;
+                            int targetY = ((row - 8) * 24) + 2;
+
+                            NF_Move3dSprite(spriteIdGrid[row - 1][col], 34 + (col * 24), startY + yOffset);
+                            NF_Set3dSpriteFrame(spriteIdGrid[row][col], 8);
+                            NF_Move3dSprite(spriteIdGrid[row][col], 34 + (col * 24), targetY - yOffset);
+
+                            NF_Draw3dSprites();       
+                            glFlush(0);               
+                            swiWaitForVBlank();       
+                            NF_Update3dSpritesGfx();  
+                        }
+
+                        grid[row][col] = grid[row - 1][col];
+                        grid[row - 1][col] = -1;
+
+                        int tempId = spriteIdGrid[row][col];
+                        spriteIdGrid[row][col] = spriteIdGrid[row - 1][col];
+                        spriteIdGrid[row - 1][col] = tempId;
+
+                        movedSomething = true;
+                        flushed = true;
+                    }
+                    else if (row == 8) {
+                        int topStartY = (7 * 24) + 2;          
+                        int bottomTargetY = 2;                 
+                        int bottomStartY = bottomTargetY - 24; 
+                        
+                        int xPos = 34 + (col * 24); 
+                        NF_Set3dSpriteFrame(spriteIdGrid[row][col], grid[row - 1][col]);
+                        
+                        for (int i = 1; i <= frames; i++) {
+                            int yOffset = (24 * i / frames);
+                            
+
+                            NF_MoveSprite(1, spriteIdGrid[row - 1][col], xPos, topStartY + yOffset);
+                            
+
+                            NF_Move3dSprite(spriteIdGrid[row][col], xPos, bottomStartY + yOffset);
+                            
+                            
+                            NF_SpriteOamSet(1);
+                            NF_Draw3dSprites();
+                            glFlush(0);
+                            swiWaitForVBlank();
+                            oamUpdate(&oamSub);
+                            NF_Update3dSpritesGfx();
+                        }
+                        
+
+                        grid[row][col] = grid[row - 1][col];
+                        grid[row - 1][col] = -1;
+                        
+
+                        NF_MoveSprite(1, spriteIdGrid[row - 1][col], xPos, topStartY);
+                        
+                        movedSomething = true;
+                        flushed = true;
+                    }
+                    else if (row < 8) {
+
+    
+                        for(int i = 1; i <= frames; i++){
+                            int yOffset = (24 * i / frames);
+
+                            int startY = ((row - 1) * 24) + 2;
+                            int targetY = (row * 24) + 2;
+                            
+                            NF_SpriteFrame(1, spriteIdGrid[row][col], 8);
+                            NF_MoveSprite(1, spriteIdGrid[row - 1][col], 34 + (col * 24), startY + yOffset);
+                            NF_MoveSprite(1, spriteIdGrid[row][col], 34 + (col * 24), targetY - yOffset);
+
+                            NF_SpriteOamSet(0);
+                            NF_SpriteOamSet(1);
+                            swiWaitForVBlank();
+                            oamUpdate(&oamMain);
+                            oamUpdate(&oamSub);
+                        }
+                        
+                        
+                        grid[row][col] = grid[row - 1][col];
+                        grid[row - 1][col] = -1;
+
+                        int tempId = spriteIdGrid[row][col];
+                        spriteIdGrid[row][col] = spriteIdGrid[row - 1][col];
+                        spriteIdGrid[row - 1][col] = tempId;
+                        
+                        movedSomething = true;
+                    }
+                }
             }
         }
     }
@@ -280,12 +379,17 @@ void fillEmptySpaces()
         }
     }
 }
+
 void drawGridTop()
 {
     for(int i = 0; i < 8; i++) {     
         for(int j = 0; j < 8; j++) { 
             int tileValue = grid[j][i]; 
-            int spriteID = (i * 8) + j; 
+
+            int spriteID = spriteIdGrid[j][i]; 
+
+
+            NF_MoveSprite(1, spriteID, 34 + (i * 24), (j * 24) + 2);
 
             if(tileValue == -1)
             {
@@ -506,6 +610,7 @@ int main(){
                     mmEffectRate(h, combo_pitches[totalMatches % 13]);
                     applyMatches();
                 }
+                //todo make a subroutine
                 if(keys_down & KEY_A)
                 {      if(isAPressed == false)
                         {
@@ -606,14 +711,12 @@ int main(){
                 }
                 drawGridTop();
                 drawGridBottom();
-                if(swiped)
-                {
-                    swiped = false;
+                if(flushed){
+                    flushed = false;
                 }
                 else{
                     glFlush(0);
                 }
-                break;
                 
         }
      }
