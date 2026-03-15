@@ -9,7 +9,7 @@
 #include <nf_lib.h>
 #include <maxmod9.h>
 #include "soundbank.h"
-
+#include <fat.h>
 #define GRID_ROWS 16
 #define GRID_COLS 8
 typedef enum
@@ -417,12 +417,41 @@ void shuffle(){
 
     }
 }
+bool checkForSave() {
+    FILE *save = fopen("fat:/M3save.sav", "r");
+    if (save) {
+        fclose(save);
+        return true;
+    } else {
+        save = fopen("fat:/M3save.sav", "w"); 
+        if (save) fclose(save);
+        return false;
+    }
+}
 
-//void swapTopTiles(directions dir)
-//{
-    
-//}
+void saveGame() {
+    FILE *save = fopen("fat:/M3save.sav", "w");
+    for (int i = 0; i < GRID_ROWS; i++) {
+        for (int j = 0; j < GRID_COLS; j++) {
+            fprintf(save, "%d ", grid[i][j]);
+        }
+        fprintf(save, "\n");
+    }
+    fclose(save);
+}
 
+void loadGame() {
+    FILE *save = fopen("fat:/M3save.sav", "r");
+    if(save == NULL){
+        return;
+    }
+    for (int i = 0; i < GRID_ROWS; i++) {
+        for (int j = 0; j < GRID_COLS; j++) {
+            fscanf(save, "%d", &grid[i][j]);
+        }
+    }
+    fclose(save);
+}
 void drawHighlightGrid(int gridX, int gridY, int spriteId,bool aPressed,directions pointingDir, uint16_t *pkeys_held)
 {
     if(*pkeys_held & KEY_START)
@@ -490,7 +519,9 @@ int main(){
     mmInitDefault("nitro:/soundbank.bin");
     NF_LoadTiledBg("bg/title_top","title_top",256,256);
     soundEnable();
-    initGrid(); 
+    fatInitDefault();
+    if(!checkForSave()) initGrid(); 
+    else loadGame();
     int semitones = 0;
     const uint16_t combo_pitches[] = {1024, 1085, 1149, 1218, 1290, 1366, 1448, 1534, 1625, 1722, 1825, 1933, 2048};
     int gridx = 0;
@@ -520,7 +551,6 @@ int main(){
                 
 
                 NF_CreateTiledBg(0, 3, "title_top");
-    
                 glFlush(0);
                 break;
             }
@@ -609,6 +639,7 @@ int main(){
                     mm_sfxhand h = mmEffect(SFX_POP);
                     mmEffectRate(h, combo_pitches[totalMatches % 13]);
                     applyMatches();
+
                 }
                 //todo make a subroutine
                 if(keys_down & KEY_A)
@@ -711,6 +742,7 @@ int main(){
                 }
                 drawGridTop();
                 drawGridBottom();
+                saveGame();
                 if(flushed){
                     flushed = false;
                 }
