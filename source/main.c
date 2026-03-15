@@ -537,7 +537,6 @@ int main(){
     int topGridY = 0;
     bool isAPressed = false;
     directions currentDir = NEUTRAL;
-    
     while(1){
         scanKeys();
         keys_down = keysDown();
@@ -742,7 +741,9 @@ int main(){
                 }
                 drawGridTop();
                 drawGridBottom();
-                saveGame();
+                if(hasMatches){
+                    saveGame();
+                }
                 if(flushed){
                     flushed = false;
                 }
