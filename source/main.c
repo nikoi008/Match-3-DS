@@ -47,48 +47,101 @@ void initGrid(){
 }
 int totalMatches = 0;
 bool matchGrid[8][8];
-bool findMatches()
+void animatePop(int length){
+    int frames = 10;
+    for(int i = 1; i < frames; i++){
+
+    }
+}
+void drawGridBottom()
 {
+    for(int i = 0; i < 8; i++)
+    {     
+        for(int j = 0; j < 8; j++)
+        {
+            int tileValue = grid[j + 8][i];
+            int spriteID = spriteIdGrid[j + 8][i]; 
+
+       
+            NF_Move3dSprite(spriteID, 34 + (i * 24), (j * 24) +2 );
+
+            if(tileValue == -1)
+            {
+                NF_Set3dSpriteFrame(spriteID, 0);   
+            }
+            else
+            {
+                NF_Set3dSpriteFrame(spriteID, tileValue); 
+            }
+        }
+    }
+}
+
+
+bool findMatches(){
     totalMatches = 0;
     bool found = false;
+    
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
             matchGrid[i][j] = false;
         }
     }
-    for(int x = 0; x < 8; x++){
-        for(int y = 8; y < 16 - 2; y++){
-        int currentTile = grid[y][x];
-        if(currentTile == grid[y + 1][x] && currentTile == grid[y + 2][x] && currentTile != -1)
-            {
-                int matchGridY = y - 8;
-                matchGrid[matchGridY][x] = true;
-                matchGrid[matchGridY + 1][x] = true;
-                matchGrid[matchGridY + 2][x] = true;
+
+
+    for(int cols = 0; cols < GRID_COLS; cols++) {
+        for(int rows = 8; rows < GRID_ROWS - 2; rows++) {
+            int currentTile = grid[rows][cols];
+            
+            
+            if(currentTile != -1 && currentTile == grid[rows + 1][cols] && currentTile == grid[rows + 2][cols]) {
+                int matchGridY = rows - 8;
+                matchGrid[matchGridY][cols] = true;
+                matchGrid[matchGridY + 1][cols] = true;
+                matchGrid[matchGridY + 2][cols] = true;
                 found = true;
                 totalMatches += 1;
+                
+                
+                if(rows + 3 < GRID_ROWS && currentTile == grid[rows + 3][cols]) {
+                    matchGrid[matchGridY + 3][cols] = true;
+                    
+
+                    if(rows + 4 < GRID_ROWS && currentTile == grid[rows + 4][cols]) {
+                        matchGrid[matchGridY + 4][cols] = true;
+                    }
+                }
             }
         }
     }
-    for(int y = 8; y < 16; y++)
-    {
-        for(int x = 0; x < 8 - 2; x++)
-        {
-            int currentTile = grid[y][x];
-            if(currentTile == grid[y][x + 1] && currentTile == grid[y][x + 2] && currentTile != -1)
-            {
-                int matchGridY = y - 8;
-                matchGrid[matchGridY][x] = true;
-                matchGrid[matchGridY][x + 1] = true;
-                matchGrid[matchGridY][x + 2] = true;
+
+
+    for(int rows = 8; rows < GRID_ROWS; rows++){
+       
+        for(int cols = 0; cols < GRID_COLS - 2; cols++){ 
+            int currentTile = grid[rows][cols];
+            
+            if(currentTile != -1 && currentTile == grid[rows][cols + 1] && currentTile == grid[rows][cols + 2]){
+                int matchGridY = rows - 8;
+                matchGrid[matchGridY][cols] = true;
+                matchGrid[matchGridY][cols + 1] = true;
+                matchGrid[matchGridY][cols + 2] = true;
                 found = true;
                 totalMatches += 1;
-            }   
+                
+
+                if(cols + 3 < GRID_COLS && currentTile == grid[rows][cols + 3]){
+                    matchGrid[matchGridY][cols + 3] = true;
+
+                    if(cols + 4 < GRID_COLS && currentTile == grid[rows][cols + 4]){
+                        matchGrid[matchGridY][cols + 4] = true;
+                    }
+                }
+            }
         }
     }
     return found;
 }
-
 void animateSpriteSwipe(Swipe SwipeDir, int gridX, int gridY) {
     int targetX = gridX;
     int targetY = gridY;
@@ -138,6 +191,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             grid[gridY][gridX] = grid[gridY][gridX - 1]; 
             grid[gridY][gridX - 1] = temp;
             animateSpriteSwipe(SwipeLeft,gridX,gridY);
+            drawGridBottom();
             if(findMatches())
             { 
                 break;
@@ -148,6 +202,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
                 grid[gridY][gridX - 1] = grid[gridY][gridX];
                 grid[gridY][gridX] = temp;
                 animateSpriteSwipe(SwipeRight,gridX - 1,gridY);
+                drawGridBottom();
             }
             break;
         }
@@ -158,6 +213,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             grid[gridY][gridX] = grid[gridY][gridX + 1];
             grid[gridY][gridX + 1] = temp;
             animateSpriteSwipe(SwipeRight,gridX,gridY);
+            drawGridBottom();
             if(findMatches()){ 
                 break ;
             }
@@ -166,6 +222,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
                 grid[gridY][gridX + 1] = grid[gridY][gridX];
                 grid[gridY][gridX] = temp;
                 animateSpriteSwipe(SwipeLeft,gridX + 1,gridY);
+                drawGridBottom();
             }
             break;
         }
@@ -176,6 +233,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             grid[gridY][gridX] = grid[gridY - 1][gridX];
             grid[gridY - 1][gridX] = temp;
             animateSpriteSwipe(SwipeUp,gridX,gridY);
+            drawGridBottom();
             if(findMatches())
             { 
                 break;
@@ -185,6 +243,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
                 grid[gridY - 1][gridX] = grid[gridY][gridX];
                 grid[gridY][gridX] = temp;
                 animateSpriteSwipe(SwipeDown,gridX,gridY - 1);
+                drawGridBottom();
             }
             break;
         }
@@ -195,6 +254,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             grid[gridY][gridX] = grid[gridY + 1][gridX];
             grid[gridY + 1][gridX] = temp;
             animateSpriteSwipe(SwipeDown,gridX,gridY);
+            drawGridBottom();
             if(findMatches())
             { 
                 break;
@@ -204,35 +264,13 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
                 grid[gridY + 1][gridX] = grid[gridY][gridX];
                 grid[gridY][gridX] = temp;
                 animateSpriteSwipe(SwipeUp,gridX,gridY + 1);
+                drawGridBottom();
             }
             break;
         }
     }
     flushed = true;
     return true;
-}
-void drawGridBottom()
-{
-    for(int i = 0; i < 8; i++)
-    {     
-        for(int j = 0; j < 8; j++)
-        {
-            int tileValue = grid[j + 8][i];
-            int spriteID = spriteIdGrid[j + 8][i]; 
-
-       
-            NF_Move3dSprite(spriteID, 34 + (i * 24), (j * 24) +2 );
-
-            if(tileValue == -1)
-            {
-                NF_Set3dSpriteFrame(spriteID, 0);   
-            }
-            else
-            {
-                NF_Set3dSpriteFrame(spriteID, tileValue); 
-            }
-        }
-    }
 }
 
 
@@ -244,6 +282,7 @@ void applyMatches()
         {
             if(matchGrid[i][j] == true)
             {
+
                 grid[i + 8][j] = -1;
                 
             }
@@ -265,9 +304,9 @@ void applyGravity() {
                 
                 
                 if (grid[row][col] == -1 && grid[row - 1][col] != -1) {
-                    
+
                     if (row > 8) {
-                        
+
 
                         for (int i = 1; i <= frames; i++) {
                             int yOffset = (24 * i / frames);
@@ -337,7 +376,7 @@ void applyGravity() {
                             int yOffset = (24 * i / frames);
 
                             int startY = ((row - 1) * 24) + 2;
-                            int targetY = (row * 24) + 2;
+                            int targetY = (row * 24) + 2; 
                             
                             NF_SpriteFrame(1, spriteIdGrid[row][col], 8);
                             NF_MoveSprite(1, spriteIdGrid[row - 1][col], 34 + (col * 24), startY + yOffset);
@@ -348,6 +387,8 @@ void applyGravity() {
                             swiWaitForVBlank();
                             oamUpdate(&oamMain);
                             oamUpdate(&oamSub);
+                            NF_Draw3dSprites();  
+                            glFlush(0);        
                         }
                         
                         
@@ -366,15 +407,11 @@ void applyGravity() {
     }
 }
 
-void fillEmptySpaces()
-{
-    for(int i = 0; i < 8; i++)
-    {
-        for(int j = 0; j < 8; j++)
-        {
-            if(grid[i][j] == -1)
-            {
-                grid[i][j] = rand() % 7;
+void fillEmptySpaces() {
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 16; j++) {  
+            if(grid[j][i] == -1) {
+                grid[j][i] = rand() % 7;
             }
         }
     }
@@ -517,7 +554,9 @@ int main(){
     NF_InitSpriteBuffers();    
     NF_Init3dSpriteSys(); 
     mmInitDefault("nitro:/soundbank.bin");
-    NF_LoadTiledBg("bg/title_top","title_top",256,256);
+    bool fall = true;
+  //  NF_LoadTiledBg("bg/bg_bottom","title_bottom",256,256); 
+  //  NF_LoadTiledBg("bg/bg_top","title_top",256,256);
     soundEnable();
     fatInitDefault();
     if(!checkForSave()) initGrid(); 
@@ -530,7 +569,7 @@ int main(){
     uint16_t keys_up;
     uint16_t keys_down;
     bool swiped = false;
-    States state = INIT_MATCH;
+    States state = INIT_MATCH;//todo make start once completed
     mmLoad(MOD_TITLE);                                          
     mmStart(MOD_TITLE, MM_PLAY_LOOP);
     int topGridX = 0;
@@ -545,11 +584,9 @@ int main(){
         switch(state){
             case(START):
             {   
+                NF_CreateTiledBg(1,0,"title_top");
+                NF_CreateTiledBg(0,1,"title_bottom");
 
-                //NF_LoadTiledBg("bg/title_bottom","title_bottom",256,256); tobemade
-                
-
-                NF_CreateTiledBg(0, 3, "title_top");
                 glFlush(0);
                 break;
             }
@@ -607,6 +644,7 @@ int main(){
                     mmStart(MOD_GAME, MM_PLAY_LOOP);
                     mmSetModuleVolume(256);
                     state = GAME_MATCH;
+                    break;
             }
             case(GAME_MATCH):
             {
@@ -638,6 +676,7 @@ int main(){
                     mm_sfxhand h = mmEffect(SFX_POP);
                     mmEffectRate(h, combo_pitches[totalMatches % 13]);
                     applyMatches();
+                    fall = false;
 
                 }
                 //todo make a subroutine
@@ -733,11 +772,19 @@ int main(){
 
                 drawHighlightGrid(topGridX,topGridY,67,isAPressed,currentDir,&keys_held);    
 
-                applyGravity();
-                for(int i = 0; i < 2;i++) 
-                {
-                    fillEmptySpaces();
+               // applyGravity();   
+                //for(int i = 0; i < 2;i++) 
+               // {
+                //fillEmptySpaces();
+                  //  applyGravity();
+                //}
+                if(!fall){
                     applyGravity();
+                    fillEmptySpaces();
+                    if(!findMatches()){
+                        fall = true;
+                        
+                    }
                 }
                 drawGridTop();
                 drawGridBottom();
@@ -750,6 +797,7 @@ int main(){
                 else{
                     glFlush(0);
                 }
+                break;
                 
         }
      }
