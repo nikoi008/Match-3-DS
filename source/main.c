@@ -41,17 +41,44 @@ void initGrid(){
     {
         for(int j = 0; j < GRID_COLS;j++)
         {
-            grid[i][j] = rand() % 7;
+            grid[i][j] = rand() % 7;  
         }
     }
 }
 int totalMatches = 0;
 bool matchGrid[8][8];
-void animatePop(int length){
-    int frames = 10;
-    for(int i = 1; i < frames; i++){
-
+typedef enum{
+    HORIZONTAL,
+    VERTICAL
+}matchtype;
+void animatePop(int length,int row, int col, matchtype type){
+    int ids[length] = {};
+     
+    int frames = 16;
+    for(int i = 0; i < length; i++){
+        if(type == HORIZONTAL){
+            ids[i] = spriteIdGrid[row][col + i];
+        }
+        else{
+            ids[i] = spriteIdGrid[row + i][col];
+        }
     }
+    flushed = true;
+    for(int i = 0; i < frames; i++){
+        for(int j = 0; j < length; j++){
+        NF_Set3dSpriteFrame(ids[j], 8 + (i / (frames / 4))); 
+        }
+        NF_SpriteOamSet(0);
+        NF_SpriteOamSet(1);
+        NF_Update3dSpritesGfx(); 
+        NF_Draw3dSprites();
+        glFlush(0);
+        swiWaitForVBlank();     
+        oamUpdate(&oamMain);
+        oamUpdate(&oamSub);
+ 
+    }
+
 }
 void drawGridBottom()
 {
@@ -70,7 +97,7 @@ void drawGridBottom()
                 NF_Set3dSpriteFrame(spriteID, 0);   
             }
             else
-            {
+            {  
                 NF_Set3dSpriteFrame(spriteID, tileValue); 
             }
         }
@@ -81,7 +108,7 @@ void drawGridBottom()
 bool findMatches(){
     totalMatches = 0;
     bool found = false;
-    
+    int length = 0;
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
             matchGrid[i][j] = false;
@@ -101,16 +128,22 @@ bool findMatches(){
                 matchGrid[matchGridY + 2][cols] = true;
                 found = true;
                 totalMatches += 1;
+                length = 3;
                 
                 
                 if(rows + 3 < GRID_ROWS && currentTile == grid[rows + 3][cols]) {
                     matchGrid[matchGridY + 3][cols] = true;
                     
+                    length = 4;
 
                     if(rows + 4 < GRID_ROWS && currentTile == grid[rows + 4][cols]) {
                         matchGrid[matchGridY + 4][cols] = true;
+                        length = 5;
                     }
                 }
+
+                animatePop(length,rows,cols,VERTICAL);
+                rows+= length - 1;
             }
         }
     }
@@ -128,15 +161,21 @@ bool findMatches(){
                 matchGrid[matchGridY][cols + 2] = true;
                 found = true;
                 totalMatches += 1;
-                
+                length = 3;
 
                 if(cols + 3 < GRID_COLS && currentTile == grid[rows][cols + 3]){
                     matchGrid[matchGridY][cols + 3] = true;
+                    length = 4;
+                
 
                     if(cols + 4 < GRID_COLS && currentTile == grid[rows][cols + 4]){
                         matchGrid[matchGridY][cols + 4] = true;
+                        length = 5;
                     }
                 }
+
+                animatePop(length,rows,cols,HORIZONTAL);
+                cols += length - 1;
             }
         }
     }
@@ -178,7 +217,29 @@ void animateSpriteSwipe(Swipe SwipeDir, int gridX, int gridY) {
         NF_Update3dSpritesGfx();  
     }
 }
-    
+bool findSwipeMatches(){
+    int length = 0;
+    for(int cols = 0; cols < GRID_COLS; cols++) {
+        for(int rows = 8; rows < GRID_ROWS - 2; rows++) {
+            int currentTile = grid[rows][cols];
+            
+            
+            if(currentTile != -1 && currentTile == grid[rows + 1][cols] && currentTile == grid[rows + 2][cols]) {
+                return true;
+                rows+= length - 1;
+            }
+        }
+    }
+    for(int rows = 8; rows < GRID_ROWS; rows++){
+        for(int cols = 0; cols < GRID_COLS - 2; cols++){ 
+            int currentTile = grid[rows][cols];
+            if(currentTile != -1 && currentTile == grid[rows][cols + 1] && currentTile == grid[rows][cols + 2]){
+                return true;
+            }
+        }
+    }
+    return false;;
+}
 bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
     
     if(gridX > 7 || gridX < 0 || gridY > 15 || gridY < 7) return false;
@@ -192,7 +253,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             grid[gridY][gridX - 1] = temp;
             animateSpriteSwipe(SwipeLeft,gridX,gridY);
             drawGridBottom();
-            if(findMatches())
+            if(findSwipeMatches())
             { 
                 break;
             }
@@ -214,7 +275,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             grid[gridY][gridX + 1] = temp;
             animateSpriteSwipe(SwipeRight,gridX,gridY);
             drawGridBottom();
-            if(findMatches()){ 
+            if(findSwipeMatches()){ 
                 break ;
             }
             else
@@ -234,7 +295,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             grid[gridY - 1][gridX] = temp;
             animateSpriteSwipe(SwipeUp,gridX,gridY);
             drawGridBottom();
-            if(findMatches())
+            if(findSwipeMatches())
             { 
                 break;
             }
@@ -255,7 +316,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
             grid[gridY + 1][gridX] = temp;
             animateSpriteSwipe(SwipeDown,gridX,gridY);
             drawGridBottom();
-            if(findMatches())
+            if(findSwipeMatches())
             { 
                 break;
             }
@@ -272,7 +333,7 @@ bool swipeBlocks(int gridX, int gridY, Swipe swipeDir){
     flushed = true;
     return true;
 }
-
+  
 
 void applyMatches()
 {
@@ -284,15 +345,18 @@ void applyMatches()
             {
 
                 grid[i + 8][j] = -1;
+
+                NF_Set3dSpriteFrame(spriteIdGrid[i + 8][j], 8);
                 
             }
         }
     }
+    
 }
 typedef struct{
     int emptyX;
     int emptyY;
-}falling;
+}falling; 
 void applyGravity() {
     bool movedSomething = true;
     int frames = 4;
@@ -340,7 +404,7 @@ void applyGravity() {
                         
                         int xPos = 34 + (col * 24); 
                         NF_Set3dSpriteFrame(spriteIdGrid[row][col], grid[row - 1][col]);
-                        
+                         
                         for (int i = 1; i <= frames; i++) {
                             int yOffset = (24 * i / frames);
                             
@@ -594,13 +658,13 @@ int main(){
             {
                     mmLoadEffect(SFX_POP);
                     mmLoad(MOD_GAME);
-                    NF_LoadSpriteGfx("sprite/crops3d", 0, 32, 32);
-                    NF_LoadSpritePal("sprite/crops3d", 0);
+                    NF_LoadSpriteGfx("sprite/sprite3d", 0, 32, 32);
+                    NF_LoadSpritePal("sprite/sprite3d", 0);
                     NF_Vram3dSpriteGfx(0, 0, false);
                     NF_Vram3dSpritePal(0, 0);
                     NF_Sort3dSprites();
-                    NF_LoadSpriteGfx("sprite/character", 1, 32, 32);  
-                    NF_LoadSpritePal("sprite/character", 1);                    
+                    NF_LoadSpriteGfx("sprite/sprite2d", 1, 32, 32);  
+                    NF_LoadSpritePal("sprite/sprite2d", 1);                    
                     NF_VramSpritePal(1, 1, 1);
                     NF_VramSpriteGfx(1, 1, 1, false); 
                     NF_LoadTiledBg("bg/match_grid", "match_grid", 256, 256);
@@ -679,7 +743,7 @@ int main(){
                     fall = false;
 
                 }
-                //todo make a subroutine
+                
                 if(keys_down & KEY_A)
                 {      if(isAPressed == false)
                         {
@@ -771,24 +835,20 @@ int main(){
 
 
                 drawHighlightGrid(topGridX,topGridY,67,isAPressed,currentDir,&keys_held);    
-
-               // applyGravity();   
-                //for(int i = 0; i < 2;i++) 
-               // {
-                //fillEmptySpaces();
-                  //  applyGravity();
-                //}
-                if(!fall){
-                    applyGravity();
-                    fillEmptySpaces();
-                    if(!findMatches()){
-                        fall = true;
-                        
+                if(!fall) {
+                        applyGravity();
+                        fillEmptySpaces();
+                
+                        if(!findMatches()) { 
+                            fall = true;
+                        } else {
+                    
+                            applyMatches();
+                        }
                     }
-                }
                 drawGridTop();
                 drawGridBottom();
-                if(hasMatches){
+                if(hasMatches){  
                     saveGame();
                 }
                 if(flushed){
@@ -812,3 +872,4 @@ int main(){
         NF_Update3dSpritesGfx();
     }
 } 
+ 
