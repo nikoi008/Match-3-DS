@@ -3,9 +3,10 @@ Farm fable is a match 3 game for the Nintendo DS written using [BlocksDS](https:
 
 # Controls
 This game is centered around touch controls, so one has to use the stylus to swipe around for matches.
-If you are on an emulator and are wondering why the top half of the game is unresponive, it's because the ds only has a touchscreen on the bottom screen, so make sure to swipe using a cursor or finger if you are using a mobile device on the bottom 8x8 grid! 
+If you are on an emulator and are wondering why the top half of the game is unresponive, it's because the ds only has a touchscreen on the bottom screen, so make sure to swipe using a cursor or finger if you are using a mobile device on the bottom 8x8 grid!  
+You can also make a small gap in between both screens by doing `View > Screen Gap > Narrow/Small/Large Border` for a clearer boundary
 # DeSmuME
-An unmodified version of DeSmuME 0.9.13 is bundled with the rom. To use it simply open the executable, go to file > open ROM, and select farm_fable.nds.
+An unmodified version of DeSmuME 0.9.13 is bundled with the rom. To use it simply open the executable, go to `file > open ROM`, and select Farm Fable.nds.
 
 # Building
 As mentioned, this game uses [BlocksDS](https://blocksds.skylyrac.net/)  and [NFlib](https://github.com/knightfox75/nds_nflib), as well as [maxmod](https://maxmod.org/) for the sound library. Otherwise all tools are included so you can build it using WSL for windows. Documentation can be found [here](https://blocksds.skylyrac.net/), which includes a get started page for those who are interested.
